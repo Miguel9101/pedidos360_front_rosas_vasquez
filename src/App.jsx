@@ -5,69 +5,106 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import '@aws-amplify/ui-react/styles.css';
 import awsConfig from './aws-exports';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { apiFetch } from './apiFetch'; // Importamos el interceptor
+import { apiFetch } from './apiFetch';
 
 Amplify.configure(awsConfig);
 
-// Componentes de vista rápidos para la prueba
 const Inicio = () => {
-  const [mensaje, setMensaje] = useState("Cargando datos del backend...");
+  const [pedidos, setPedidos] = useState([]);
+  const [descripcion, setDescripcion] = useState("");
+  const [total, setTotal] = useState("");
 
-  useEffect(() => {
-    const obtenerPedidos = async () => {
-      try {
-        const respuesta = await apiFetch('/api/pedidos');
-        if (respuesta.ok) {
-          const texto = await respuesta.text();
-          setMensaje(texto);
-        } else {
-          setMensaje(`Error HTTP: ${respuesta.status}`);
-        }
-      } catch (error) {
-        setMensaje("Error al conectar con el backend. ¿Está encendido el servidor Java?");
-      }
-    };
-    obtenerPedidos();
-  }, []);
+  const cargarPedidos = async () => {
+    try {
+      const respuesta = await apiFetch('/api/pedidos');
+      if (respuesta.ok) setPedidos(await respuesta.json());
+    } catch (error) { console.error(error); }
+  };
+
+  useEffect(() => { cargarPedidos(); }, []);
+
+  const crearPedido = async (e) => {
+    e.preventDefault();
+    await apiFetch('/api/pedidos', {
+      method: 'POST',
+      body: JSON.stringify({ descripcion, total: parseInt(total) })
+    });
+    setDescripcion(""); setTotal("");
+    cargarPedidos(); // Recarga la lista
+  };
 
   return (
     <div>
-      <h2>Panel General de Pedidos</h2>
-      <div style={{ padding: '15px', background: '#e9ecef', borderRadius: '5px' }}>
-        <strong>Respuesta del Servidor:</strong> {mensaje}
-      </div>
+      <h2>Ingresar Nuevo Pedido</h2>
+      <form onSubmit={crearPedido} style={{ marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '5px' }}>
+        <input 
+          type="text" 
+          placeholder="Descripción..." 
+          value={descripcion} 
+          onChange={e => setDescripcion(e.target.value)} 
+          required 
+          style={{ marginRight: '10px', padding: '5px' }} 
+        />
+        <input 
+          type="number" 
+          placeholder="Total ($)" 
+          value={total} 
+          onChange={e => setTotal(e.target.value)} 
+          required 
+          style={{ marginRight: '10px', padding: '5px' }} 
+        />
+        <button type="submit" style={{ padding: '6px 15px', cursor: 'pointer' }}>Guardar</button>
+      </form>
+
+      <h3>Pedidos Registrados</h3>
+      <ul style={{ textAlign: 'left', background: '#e9ecef', padding: '15px', borderRadius: '5px', listStylePosition: 'inside' }}>
+        {pedidos.length === 0 ? <li>No hay pedidos registrados.</li> : null}
+        {pedidos.map(p => <li key={p.id}>ID {p.id}: {p.descripcion} - ${p.total}</li>)}
+      </ul>
     </div>
   );
 };
-const AdminPanel = () => {
-  const [mensajeAdmin, setMensajeAdmin] = useState("Cargando datos administrativos...");
 
-  useEffect(() => {
-    const obtenerDatosAdmin = async () => {
-      try {
-        const respuesta = await apiFetch('/api/pedidos/admin');
-        if (respuesta.ok) {
-          const texto = await respuesta.text();
-          setMensajeAdmin(texto);
-        } else {
-          setMensajeAdmin(`Error HTTP: ${respuesta.status} - Acceso Denegado por el Backend`);
-        }
-      } catch (error) {
-        setMensajeAdmin("Error al conectar con el backend.");
-      }
-    };
-    obtenerDatosAdmin();
-  }, []);
+const AdminPanel = () => {
+  const [pedidos, setPedidos] = useState([]);
+
+  const cargarPedidos = async () => {
+    try {
+      const respuesta = await apiFetch('/api/pedidos');
+      if (respuesta.ok) setPedidos(await respuesta.json());
+    } catch (error) { console.error(error); }
+  };
+
+  useEffect(() => { cargarPedidos(); }, []);
+
+  const eliminarPedido = async (id) => {
+    const respuesta = await apiFetch(`/api/pedidos/${id}`, { method: 'DELETE' });
+    if (respuesta.ok) cargarPedidos();
+  };
 
   return (
     <div>
       <h2>Panel de Control Administrativo</h2>
       <div style={{ padding: '15px', background: '#ffeeba', borderRadius: '5px' }}>
-        <strong>Respuesta del Servidor Seguro:</strong> {mensajeAdmin}
+        <p>Como administrador, tienes permisos destructivos sobre la base de datos.</p>
+        <ul style={{ textAlign: 'left', listStylePosition: 'inside', paddingLeft: 0 }}>
+          {pedidos.length === 0 ? <li>No hay pedidos registrados.</li> : null}
+          {pedidos.map(p => (
+            <li key={p.id} style={{ marginBottom: '10px' }}>
+              <strong>ID {p.id}:</strong> {p.descripcion} - ${p.total} 
+              <button 
+                onClick={() => eliminarPedido(p.id)} 
+                style={{ marginLeft: '15px', background: 'red', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', borderRadius: '3px' }}>
+                Eliminar
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
 };
+
 const NoAutorizado = () => <h2 style={{color: 'red'}}>Acceso denegado: Rol insuficiente</h2>;
 
 function App() {
@@ -86,12 +123,10 @@ function App() {
               </div>
               <button onClick={signOut} style={{ height: '35px', cursor: 'pointer' }}>Cerrar sesión</button>
             </header>
-
             <main style={{ marginTop: '20px' }}>
               <Routes>
                 <Route path="/" element={<Inicio />} />
                 <Route path="/no-autorizado" element={<NoAutorizado />} />
-                {/* Ruta protegida que exige el rol ADMIN */}
                 <Route 
                   path="/admin" 
                   element={
