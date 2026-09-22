@@ -30,37 +30,87 @@ const Inicio = () => {
       body: JSON.stringify({ descripcion, total: parseInt(total) })
     });
     setDescripcion(""); setTotal("");
-    cargarPedidos(); // Recarga la lista
+    cargarPedidos();
   };
 
   return (
-    <div>
-      <h2>Ingresar Nuevo Pedido</h2>
-      <form onSubmit={crearPedido} style={{ marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '5px' }}>
-        <input 
-          type="text" 
-          placeholder="Descripción..." 
-          value={descripcion} 
-          onChange={e => setDescripcion(e.target.value)} 
-          required 
-          style={{ marginRight: '10px', padding: '5px' }} 
-        />
-        <input 
-          type="number" 
-          placeholder="Total ($)" 
-          value={total} 
-          onChange={e => setTotal(e.target.value)} 
-          required 
-          style={{ marginRight: '10px', padding: '5px' }} 
-        />
-        <button type="submit" style={{ padding: '6px 15px', cursor: 'pointer' }}>Guardar</button>
-      </form>
+    <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px', alignItems: 'start' }}>
+      {/* Formulario */}
+      <div style={{ background: '#ffffff', padding: '28px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)', border: '1px solid #f0f2f5' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <div style={{ background: '#e0f2fe', color: '#0284c7', padding: '10px', borderRadius: '12px', fontSize: '1.2rem' }}>📦</div>
+          <div>
+            <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.15rem', fontWeight: '700' }}>Nuevo Pedido</h2>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>Registra un producto en el sistema</p>
+          </div>
+        </div>
 
-      <h3>Pedidos Registrados</h3>
-      <ul style={{ textAlign: 'left', background: '#e9ecef', padding: '15px', borderRadius: '5px', listStylePosition: 'inside' }}>
-        {pedidos.length === 0 ? <li>No hay pedidos registrados.</li> : null}
-        {pedidos.map(p => <li key={p.id}>ID {p.id}: {p.descripcion} - ${p.total}</li>)}
-      </ul>
+        <form onSubmit={crearPedido} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Descripción</label>
+            <input 
+              type="text" 
+              placeholder="Ej. Pizza Pepperoni Familiar" 
+              value={descripcion} 
+              onChange={e => setDescripcion(e.target.value)} 
+              required 
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#1e293b', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', transition: 'all 0.2s' }} 
+              onFocus={e => e.target.style.borderColor = '#3b82f6'}
+              onBlur={e => e.target.style.borderColor = '#cbd5e1'}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total ($)</label>
+            <input 
+              type="number" 
+              placeholder="Ej. 12990" 
+              value={total} 
+              onChange={e => setTotal(e.target.value)} 
+              required 
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#1e293b', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none', transition: 'all 0.2s' }} 
+              onFocus={e => e.target.style.borderColor = '#3b82f6'}
+              onBlur={e => e.target.style.borderColor = '#cbd5e1'}
+            />
+          </div>
+          <button type="submit" style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none', padding: '12px', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)', transition: 'transform 0.1s' }}>
+            Guardar Pedido
+          </button>
+        </form>
+      </div>
+
+      {/* Lista de Pedidos */}
+      <div style={{ background: '#ffffff', padding: '28px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)', border: '1px solid #f0f2f5' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ background: '#f1f5f9', color: '#475569', padding: '8px 12px', borderRadius: '10px', fontSize: '1rem' }}>📋</div>
+            <h3 style={{ margin: 0, color: '#0f172a', fontSize: '1.15rem', fontWeight: '700' }}>Pedidos Registrados</h3>
+          </div>
+          <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600' }}>
+            {pedidos.length} total
+          </span>
+        </div>
+
+        {pedidos.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+            <p style={{ fontSize: '2rem', margin: '0 0 10px 0' }}>📂</p>
+            <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: '500' }}>No hay pedidos registrados en el sistema.</p>
+          </div>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {pedidos.map(p => (
+              <li key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', transition: 'background 0.2s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700' }}>#{p.id}</span>
+                  <span style={{ color: '#1e293b', fontWeight: '600', fontSize: '0.95rem' }}>{p.descripcion}</span>
+                </div>
+                <span style={{ background: '#dcfce7', color: '#15803d', padding: '6px 12px', borderRadius: '20px', fontWeight: '700', fontSize: '0.9rem' }}>
+                  ${p.total.toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };
@@ -83,60 +133,79 @@ const AdminPanel = () => {
   };
 
   return (
-    <div>
-      <h2>Panel de Control Administrativo</h2>
-      <div style={{ padding: '15px', background: '#ffeeba', borderRadius: '5px' }}>
-        <p>Como administrador, tienes permisos destructivos sobre la base de datos.</p>
-        <ul style={{ textAlign: 'left', listStylePosition: 'inside', paddingLeft: 0 }}>
-          {pedidos.length === 0 ? <li>No hay pedidos registrados.</li> : null}
-          {pedidos.map(p => (
-            <li key={p.id} style={{ marginBottom: '10px' }}>
-              <strong>ID {p.id}:</strong> {p.descripcion} - ${p.total} 
-              <button 
-                onClick={() => eliminarPedido(p.id)} 
-                style={{ marginLeft: '15px', background: 'red', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', borderRadius: '3px' }}>
-                Eliminar
-              </button>
-            </li>
-          ))}
-        </ul>
+    <div style={{ background: '#ffffff', padding: '30px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)', border: '1px solid #f0f2f5', maxWidth: '850px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+        <div style={{ background: '#fee2e2', color: '#991b1b', padding: '10px', borderRadius: '12px', fontSize: '1.2rem' }}>🛡️</div>
+        <div>
+          <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.25rem', fontWeight: '700' }}>Panel de Control Administrativo</h2>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Gestión avanzada y permisos destructivos sobre la base de datos.</p>
+        </div>
+      </div>
+      
+      <div style={{ marginTop: '25px' }}>
+        {pedidos.length === 0 ? (
+          <p style={{ color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: '30px 0' }}>No hay registros para administrar.</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {pedidos.map(p => (
+              <li key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: '#fff1f2', borderRadius: '12px', border: '1px solid #fecdd3' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ background: '#fee2e2', color: '#991b1b', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700' }}>#{p.id}</span>
+                  <span style={{ color: '#1e293b', fontWeight: '600' }}>{p.descripcion}</span>
+                  <span style={{ color: '#64748b', fontSize: '0.9rem' }}>(${p.total.toLocaleString()})</span>
+                </div>
+                <button 
+                  onClick={() => eliminarPedido(p.id)} 
+                  style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 14px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem', boxShadow: '0 2px 6px rgba(239, 68, 68, 0.2)' }}>
+                  Eliminar
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
 };
 
-const NoAutorizado = () => <h2 style={{color: 'red'}}>Acceso denegado: Rol insuficiente</h2>;
+const NoAutorizado = () => <h2 style={{color: '#ef4444', textAlign: 'center'}}>Acceso denegado: Rol de Administrador requerido</h2>;
 
 function App() {
   return (
     <Authenticator>
       {({ signOut, user }) => (
         <BrowserRouter>
-          <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-              <div>
-                <strong>Usuario: {user?.username} </strong>
-                <nav style={{ marginTop: '10px', display: 'flex', gap: '15px' }}>
-                  <Link to="/">Ver Pedidos</Link>
-                  <Link to="/admin">Administración</Link>
-                </nav>
-              </div>
-              <button onClick={signOut} style={{ height: '35px', cursor: 'pointer' }}>Cerrar sesión</button>
-            </header>
-            <main style={{ marginTop: '20px' }}>
-              <Routes>
-                <Route path="/" element={<Inicio />} />
-                <Route path="/no-autorizado" element={<NoAutorizado />} />
-                <Route 
-                  path="/admin" 
-                  element={
-                    <ProtectedRoute requiredRole="ADMIN">
-                      <AdminPanel />
-                    </ProtectedRoute>
-                  } 
-                />
-              </Routes>
-            </main>
+          <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '40px 20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+            <div style={{ maxWidth: '1050px', margin: '0 auto' }}>
+              <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '16px 28px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)', marginBottom: '30px', border: '1px solid #f0f2f5' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f1f5f9', padding: '6px 12px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>
+                    <span>👤</span> {user?.username}
+                  </div>
+                  <nav style={{ display: 'flex', gap: '20px' }}>
+                    <Link to="/" style={{ textDecoration: 'none', color: '#2563eb', fontWeight: '600', fontSize: '0.95rem' }}>Ver Pedidos</Link>
+                    <Link to="/admin" style={{ textDecoration: 'none', color: '#2563eb', fontWeight: '600', fontSize: '0.95rem' }}>Administración</Link>
+                  </nav>
+                </div>
+                <button onClick={signOut} style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fee2e2', padding: '8px 16px', borderRadius: '10px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem', transition: 'background 0.2s' }}>
+                  Cerrar sesión
+                </button>
+              </header>
+              <main>
+                <Routes>
+                  <Route path="/" element={<Inicio />} />
+                  <Route path="/no-autorizado" element={<NoAutorizado />} />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <ProtectedRoute requiredRole="ADMIN">
+                        <AdminPanel />
+                      </ProtectedRoute>
+                    } 
+                  />
+                </Routes>
+              </main>
+            </div>
           </div>
         </BrowserRouter>
       )}
